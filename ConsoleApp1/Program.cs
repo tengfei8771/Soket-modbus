@@ -6,7 +6,7 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            opcua o = new opcua("127.0.0.1", 502);
+            ModBusNet o = new ModBusNet("127.0.0.1", 502);
             Console.WriteLine(o.Msg);
             Console.ReadKey();
         }

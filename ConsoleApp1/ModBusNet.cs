@@ -7,14 +7,14 @@ using System.Threading;
 
 namespace ConsoleApp1
 {
-    public class opcua
+    public class ModBusNet
     {
         public Socket client;
         public bool IsConneted { get; set; }
         private string _IP { get; set; }
         private int _port { get; set; }
         public string Msg { get; set; }
-        public opcua(string IP,int port)
+        public ModBusNet(string IP,int port)
         {
             _IP = IP;
             _port = port;
