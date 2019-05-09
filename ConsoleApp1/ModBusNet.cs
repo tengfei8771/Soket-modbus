@@ -82,7 +82,7 @@ namespace ConsoleApp1
         /// <param name="address"></param>
         /// <param name="CoinNumber"></param>
         /// <returns></returns>
-        public byte[] PackHeader()
+        public byte[] PackHeader(int CommandLength)
         {
             byte[] Header = new byte[7];
             Header[0] = ModBusInfoCode.TransactionFlag[0];//事务元标识符
@@ -90,7 +90,7 @@ namespace ConsoleApp1
             Header[2] = ModBusInfoCode.AgreementFlag[0];//协议标识符
             Header[3] = ModBusInfoCode.AgreementFlag[1];//协议标识符
             Header[4] = 0x00;
-            Header[5] = 0x06;
+            Header[5] = BinaryHelper.TenToSixteen(CommandLength + 1)[0];
             Header[6] = ModBusInfoCode.UnitFlag;
             return Header;
 
@@ -151,6 +151,53 @@ namespace ConsoleApp1
             
         }
         /// <summary>
+        /// 写入多个打包方法
+        /// </summary>
+        /// <param name="Adress">地址</param>
+        /// <param name="Number">数量</param>
+        /// <param name="Value">值</param>
+        /// <param name="Flag">标示位</param>
+        /// <returns></returns>
+        public byte[] PackCommand1(int Adress, int Number, int Value,int Flag)
+        {
+            byte[] Add = BinaryHelper.TenToSixteen(Adress);
+            byte[] Num = BinaryHelper.TenToSixteen(Number);
+            byte[] InputValue = BinaryHelper.TenToSixteen(Value);
+            byte[] Command = new byte[6 + InputValue.Length];
+            switch (Flag)
+            {
+                case 15:
+                    Command[0] = 0x0F;
+                    break;
+                default:
+                    break;
+            }
+            if (Add.Length > 1)
+            {
+                Command[1] = Add[0];
+                Command[2] = Add[1];
+            }
+            else
+            {
+                Command[2] = Add[0];
+            }
+            if (Num.Length > 1)
+            {
+                Command[3] = Num[0];
+                Command[4] = Num[1];
+            }
+            else
+            {
+                Command[4] = Num[0];
+            }
+            Command[5] = BinaryHelper.TenToSixteen(InputValue.Length)[0];
+            for(int i = 6; i < Command.Length; i++)
+            {
+                Command[i] = InputValue[i - 6];
+            }
+            return Command;
+        }
+        /// <summary>
         /// 读取线圈方法
         /// </summary>
         /// <param name="Adress">地址</param>
@@ -159,13 +206,15 @@ namespace ConsoleApp1
         public byte[] ReadCoil(string Adress, int CoinNumber = 1)
         {
             int Flag = 1;//操作标志位，用于打包指令判断
-            byte[] request = new byte[12];
-            byte[] bt = PackHeader();
+            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, CoinNumber);
+            int length = command.Length;
+            byte[] bt = PackHeader(length);
+            byte[] request = new byte[7+length];
             for (int i = 0; i < bt.Length; i++)
             {
                 request[i] = bt[i];
             }
-            byte[] command = PackCommand(Convert.ToInt32(Adress),Flag, CoinNumber);
+            
             for (int i = 7; i < request.Length; i++)
             {
                 request[i] = command[i - 7];
@@ -184,13 +233,15 @@ namespace ConsoleApp1
         public byte[] ReadDiscrete(string Adress,int Number)
         {
             int Flag = 2;//功能标志位
-            byte[] request = new byte[12];
-            byte[] bt = PackHeader();
+            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, Number);
+            int length = command.Length;
+            byte[] bt = PackHeader(length);
+            byte[] request = new byte[7 + length];
             for (int i = 0; i < bt.Length; i++)
             {
                 request[i] = bt[i];
             }
-            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, Number);
+
             for (int i = 7; i < request.Length; i++)
             {
                 request[i] = command[i - 7];
@@ -206,13 +257,15 @@ namespace ConsoleApp1
         public byte[] ReadRegister(string Adress, int Number)
         {
             int Flag = 3;//功能标志位
-            byte[] request = new byte[12];
-            byte[] bt = PackHeader();
+            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, Number);
+            int length = command.Length;
+            byte[] bt = PackHeader(length);
+            byte[] request = new byte[7 + length];
             for (int i = 0; i < bt.Length; i++)
             {
                 request[i] = bt[i];
             }
-            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, Number);
+
             for (int i = 7; i < request.Length; i++)
             {
                 request[i] = command[i - 7];
@@ -230,13 +283,15 @@ namespace ConsoleApp1
         public byte[] ForceCoil(string Adress,int value)
         {
             int Flag = 5;//功能标志位
-            byte[] request = new byte[12];
-            byte[] bt = PackHeader();
+            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, value);
+            int length = command.Length;
+            byte[] bt = PackHeader(length);
+            byte[] request = new byte[7 + length];
             for (int i = 0; i < bt.Length; i++)
             {
                 request[i] = bt[i];
             }
-            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, value);
+
             for (int i = 7; i < request.Length; i++)
             {
                 request[i] = command[i - 7];
@@ -252,23 +307,21 @@ namespace ConsoleApp1
         public byte[] WriteRegister(string Adress, int value)
         {
             int Flag = 6;//功能标志位
-            byte[] request = new byte[12];
-            byte[] bt = PackHeader();
+            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, value);
+            int length = command.Length;
+            byte[] bt = PackHeader(length);
+            byte[] request = new byte[7 + length];
             for (int i = 0; i < bt.Length; i++)
             {
                 request[i] = bt[i];
             }
-            byte[] command = PackCommand(Convert.ToInt32(Adress), Flag, value);
+
             for (int i = 7; i < request.Length; i++)
             {
                 request[i] = command[i - 7];
             }
             return request;
         }
-
-
-
-
         /// <summary>
         /// 解析收到的数据
         /// </summary>
@@ -326,6 +379,11 @@ namespace ConsoleApp1
             }
             return DataArr;
         }
+
+
+        
+
+
 
     }
 }
