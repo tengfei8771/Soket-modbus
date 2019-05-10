@@ -90,7 +90,7 @@ namespace ConsoleApp1
             Header[2] = ModBusInfoCode.AgreementFlag[0];//协议标识符
             Header[3] = ModBusInfoCode.AgreementFlag[1];//协议标识符
             Header[4] = 0x00;
-            Header[5] = BinaryHelper.TenToSixteen(CommandLength + 1)[0];
+            Header[5] = BinaryHelper.TenToSixteen(CommandLength + 1)[0];//计算命令长度
             Header[6] = ModBusInfoCode.UnitFlag;
             return Header;
 
@@ -151,7 +151,7 @@ namespace ConsoleApp1
             
         }
         /// <summary>
-        /// 写入多个打包方法
+        /// 写入多个线圈打包方法
         /// </summary>
         /// <param name="Adress">地址</param>
         /// <param name="Number">数量</param>
@@ -194,6 +194,61 @@ namespace ConsoleApp1
             for(int i = 6; i < Command.Length; i++)
             {
                 Command[i] = InputValue[i - 6];
+            }
+            return Command;
+        }
+        /// <summary>
+        /// 写入多个寄存器值
+        /// </summary>
+        /// <param name="Adress">起始地址</param>
+        /// <param name="Number">寄存器数量</param>
+        /// <param name="Value">输入值</param>
+        /// <param name="Flag">标志位</param>
+        /// <returns></returns>
+        public byte[] PackCommand2(int Adress,int[] Value, int Flag)
+        {
+            byte[] Add = BinaryHelper.TenToSixteen(Adress);
+            byte[] Num = BinaryHelper.TenToSixteen(Value.Length);
+            byte[] Command = new byte[6 + Value.Length*2];
+            switch (Flag)
+            {
+                case 16:
+                    Command[0] = 0x10;
+                    break;
+                default:
+                    break;
+            }
+            if (Add.Length > 1)
+            {
+                Command[1] = Add[0];
+                Command[2] = Add[1];
+            }
+            else
+            {
+                Command[2] = Add[0];
+            }
+            if (Num.Length > 1)
+            {
+                Command[3] = Num[0];
+                Command[4] = Num[1];
+            }
+            else
+            {
+                Command[4] = Num[0];
+            }
+            Command[5] = BinaryHelper.TenToSixteen(Value.Length*2)[0];
+            for (int i = 6; i < Command.Length; i++)
+            {
+                byte[] bt = BinaryHelper.TenToSixteen(Value[i - 6]);
+                if (bt.Length > 1)
+                {
+                    Command[i] = bt[0];
+                    Command[i + 1] = bt[1];
+                }
+                else
+                {
+                    Command[i + 1] = bt[0];
+                }
             }
             return Command;
         }
@@ -322,6 +377,45 @@ namespace ConsoleApp1
             }
             return request;
         }
+
+
+        public byte[] ForceCoilList(string Adress,int Number,int Value)
+        {
+            int Flag = 15;
+            byte[] command = PackCommand1(Convert.ToInt32(Adress), Number, Value, Flag);
+            int length = command.Length;
+            byte[] bt = PackHeader(length);
+            byte[] request = new byte[7 + length];
+            for(int i = 0; i < bt.Length; i++)
+            {
+                request[i] = bt[i];
+            }
+            for(int i = bt.Length; i < request.Length; i++)
+            {
+                request[i] = command[i - bt.Length];
+            }
+            return request;
+
+        }
+
+        public byte[] WriteRegisterList(string Adress,int[] Value)
+        {
+            int Flag = 16;
+            byte[] command = PackCommand2(Convert.ToInt32(Adress), Value, Flag);
+            int length = command.Length;
+            byte[] bt = PackHeader(length);
+            byte[] request = new byte[7 + length];
+            for (int i = 0; i < bt.Length; i++)
+            {
+                request[i] = bt[i];
+            }
+            for (int i = bt.Length; i < request.Length; i++)
+            {
+                request[i] = command[i - bt.Length];
+            }
+            return request;
+
+        }
         /// <summary>
         /// 解析收到的数据
         /// </summary>
@@ -379,11 +473,6 @@ namespace ConsoleApp1
             }
             return DataArr;
         }
-
-
-        
-
-
 
     }
 }
