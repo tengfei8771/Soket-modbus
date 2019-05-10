@@ -26,7 +26,6 @@ namespace ConsoleApp1
         /// </summary>
         public void Connected()
         {
-            byte[] data = new byte[1024];
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(IP.Trim()), port);
             client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             try
