@@ -15,7 +15,7 @@ namespace ConsoleApp1
             //    Thread.Sleep(1000);
             //}
             //o.WriteRegisterList("20", 10, 52481);
-            o
+            
             //o.ReadCoil("16");
             //BinaryHelper.TenToSixteen(15);
             //o.ReadCoil("15");
