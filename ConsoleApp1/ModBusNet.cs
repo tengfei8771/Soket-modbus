@@ -71,10 +71,6 @@ namespace ConsoleApp1
             AlwaysSend(Adress,CoinNumber);
             Msg = ReceiveMsg();
         }
-        /// <summary>
-        /// 读线圈方法，请求为MABP报文头+功能码0x01,起始地址2byte（0x0000至0xffff），线圈数量1byte（1-2000）组成
-        /// </summary>
-        /// <param name="Adress"></param>
         
         /// <summary>
         /// 报文头打包指令（前七位）
