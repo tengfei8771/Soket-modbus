@@ -62,7 +62,7 @@ namespace ConsoleApp1
             hexString = hexString.Replace(" ", "");
             if ((hexString.Length % 2) != 0)
             {
-                hexString = hexString.Insert(hexString.Length - 1, 0.ToString());//转出来的字符串不是偶数在最前面补0
+                hexString = hexString.Insert(0, 0.ToString());//转出来的字符串不是偶数在最前面补0
             }               
             byte[] returnBytes = new byte[hexString.Length / 2];
             for (int i = 0; i < returnBytes.Length; i++)

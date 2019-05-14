@@ -8,21 +8,18 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             ModBusNet o = new ModBusNet("127.0.0.1", 502);
-            //while (true)
-            //{
-            //    o.GetTestMsg("20",19);
-            //    Console.WriteLine(o.Msg);
-            //    Thread.Sleep(1000);
-            //}
+            while (true)
+            {
+                o.GetTestMsg("1000", 19);
+                Console.WriteLine(o.Msg);
+                Thread.Sleep(1000);
+            }
             //o.WriteRegisterList("20", 10, 52481);
-            
+
             //o.ReadCoil("16");
             //BinaryHelper.TenToSixteen(15);
             //o.ReadCoil("15");
             //o.PackCommand(200);
-
-
-
         }
     }
 }
