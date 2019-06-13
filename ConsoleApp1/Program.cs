@@ -10,7 +10,7 @@ namespace ConsoleApp1
             ModBusNet o = new ModBusNet("127.0.0.1", 502);
             while (true)
             {
-                o.GetTestMsg("1000", 19);
+                o.GetTestMsg("20", 19);
                 Console.WriteLine(o.Msg);
                 Thread.Sleep(1000);
             }
